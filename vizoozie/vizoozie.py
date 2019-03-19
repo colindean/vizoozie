@@ -141,8 +141,8 @@ class VizOozie(object):
         output += self.processCloseTag()
         return output
 
-    def processWorkflow(self, in_file, out_file, relative_name):
-        inputFile = open(in_file, 'r')    
+    def processWorkflow(self, in_file, out_file, relative_name='Workflow'):
+        inputFile = open(in_file, 'r')
         input_str = inputFile.read()
         output = self.convertWorkflowXMLToDOT(input_str, relative_name)
         if output == None : return

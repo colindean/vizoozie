@@ -8,34 +8,34 @@ from subprocess import call
 VERSION='0.1'
 
 def sText(text):
-    return text.replace('-', '_')       
+    return text.replace('-', '_')
 
 class VizOozie(object):
-    
+
     properties = {}
-    
+
     def loadProperties(self):
         with open("vizoozie/vizoozie.properties") as f:
             for line in f:
                 key, val = line.split('=')
                 self.properties[key] = val
-    
+
     def getName(self, node):
         attr = self.getAttribute(node, "name")
         return attr
-    
+
     def getTo(self, node):
         attr = self.getAttribute(node, "to")
         return attr
-    
+
     def getAttribute(self, node, attributeName):
         attr = node.getAttribute(attributeName)
         return attr
-    
+
     def getOK(self, node):
         ok = node.getElementsByTagName("ok")[0]
         return ok
-    
+
     def getError(self, node):
         return node.getElementsByTagName("error")[0]
 
@@ -44,7 +44,7 @@ class VizOozie(object):
 
     def getErrorTo(self, node):
         return self.getTo(self.getError(node))
-    
+
     def processHeader(self, name):
         output = "digraph{\nsize = \"8,8\";ratio=fill;node[fontsize=24];labelloc=\"t\";label=\"" + name + "\";\nsubgraph{\n"
         return output
@@ -60,7 +60,7 @@ class VizOozie(object):
         for aNode in node.childNodes:
             if aNode.nodeType == aNode.ELEMENT_NODE:
                 return aNode
-        return None     
+        return None
 
     def processAction(self, doc):
         output = ''
@@ -71,7 +71,7 @@ class VizOozie(object):
             for key, value in self.properties.iteritems():
                 if len(node.getElementsByTagName(key)) != 0:
                     color = value
-                    break 
+                    break
             if action_node.tagName == "sub-workflow":
                 url = self.getFirstElementChildNode(action_node).childNodes[0].data
                 url = url.replace("${subworkflowPath}", "")
@@ -82,7 +82,7 @@ class VizOozie(object):
             output += '\n'+sText(name) + " -> " + sText(self.getOKTo(node)) + ";\n"
             output += '\n'+sText(name) + " -> " + sText(self.getErrorTo(node)) + "[style=dotted,fontsize=10];\n"
         return output
-    
+
     def processFork(self, doc):
         output = ''
         for node in doc.getElementsByTagName("fork"):
@@ -114,7 +114,7 @@ class VizOozie(object):
                 to = case.getAttribute("to")
                 caseValue = case.childNodes[0].nodeValue.replace('"', '')
                 output += '\n' + name.replace('-', '_') + " -> " + to.replace('-', '_') + "[style=bold,fontsize=20];\n"
-            
+
             default = switch.getElementsByTagName("default")[0]
             to = default.getAttribute("to")
             output += '\n' + name.replace('-', '_') + " -> " + to.replace('-', '_') + "[style=dotted,fontsize=20];\n"
@@ -153,7 +153,7 @@ class VizOozie(object):
         outputFile.write(str(output))
         outputFile.close()
         call(["dot", "-Tsvg", out_file, "-o", os.path.splitext(out_file)[0] + ".svg"])
-    
+
 def main():
     vizoozie = VizOozie()
     if len(sys.argv) < 3:
@@ -170,6 +170,6 @@ def main():
                     in_file = os.path.realpath(os.path.join(root,file))
                     out_file = os.path.splitext(in_file.replace(in_base_dir, out_base_dir))[0] + ".dot"
                     vizoozie.processWorkflow(in_file, out_file, in_file.replace(in_base_dir, ""))
-    
+
 if __name__ == "__main__":
     main()

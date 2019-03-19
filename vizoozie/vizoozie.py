@@ -68,7 +68,7 @@ class VizOozie(object):
             name = self.getName(node)
             action_node = self.getFirstElementChildNode(node)
             color = "white"
-            for key, value in self.properties.iteritems():
+            for key, value in self.properties.items():
                 if len(node.getElementsByTagName(key)) != 0:
                     color = value
                     break
